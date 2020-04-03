@@ -19,3 +19,31 @@ pthread_join(t, NULL);
 - Outputkan hasil perkalian matrix
 - Melepaskan segmen shared memory yang terletak di alamat
 ``` shmdt((void *) value); ```
+
+### 4b. Batu kedua adalah Amethyst. Batu mulia berwarna ungu mengkilat. Teka-tekinya adalah: 1. Buatlah program C kedua dengan nama "​ 4b.c​ ". Program ini akan mengambil variabel ​ hasil perkalian matriks dari program "4a.c" (program sebelumnya), dan tampilkan hasil matriks tersebut ke layar. (​ Catatan!​ : gunakan shared memory) 2. Setelah ditampilkan, berikutnya untuk setiap angka dari matriks tersebut, carilah nilai ​ faktorialnya​ , dan tampilkan hasilnya ke layar dengan format seperti matriks.
+Langkah-langkah : 
+- Membuat key ``` key_t key = 1234; ```
+- Get ID and Execute IPC ``` int shmid = shmget(key, 20*sizeof(int), IPC_EXCL); ```
+- Assign value (pointer untuk array) untuk menempelkan shared memory yang ditunjukkan ke ruang alamat program
+``` value = (int *)shmat(shmid, NULL, 0); ```
+- Print matrix perkalian
+- Deklarasi 20 thread (sesuai banyak elemen matrix) ``` pthread_t tid[20]; ```
+- Loop untuk membuat 20 thread yang akan menjalankan function factorial (ini uda dimodiv supaya + bukan *
+```
+for(j = 0; j < 20; j++){
+        pthread_create(&tid[j], NULL, &factorial, NULL);
+    }
+```
+- Loop untuk join thread
+```
+for(j = 0; j < 20; j++){
+        pthread_join(tid[j], NULL);
+    }
+```
+- Output matrix factorial
+- Melepaskan segmen shared memory yang terletak di alamat
+``` shmdt((void *) value); ```
+
+### 4c. Batu ketiga adalah Onyx. Batu mulia berwarna hitam mengkilat. Pecahkan teka-teki berikut! 1. Buatlah program C ketiga dengan nama "​ 4c.c​ ". Program ini tidak memiliki hubungan terhadap program yang lalu. 2. Pada program ini, Norland diminta mengetahui jumlah file dan folder di direktori saat ini dengan command "​ ls | wc -l​ ". Karena sudah belajar IPC, Norland mengerjakannya dengan semangat. (​ Catatan!​ : Harus menggunakan IPC Pipes)
+Langkah-langkah : 
+- 
