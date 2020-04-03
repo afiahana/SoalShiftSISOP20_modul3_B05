@@ -7,7 +7,7 @@ Langkah-langkah :
 - Membuat key ``` key_t key = 1234; ```
 - Get ID and Create IPC
 ``` int shmid = shmget(key, 20*sizeof(int), IPC_CREAT | 0666); ```
-- Assign value (pointer untuk array) agar nanti di shared memory
+- Assign value (pointer untuk array) untuk menempelkan shared memory yang ditunjukkan ke ruang alamat program
 ``` value = (int *)shmat(shmid, NULL, 0); ```
 - Deklarasi matrix (disini menggunakan rand() untuk mendapatkan angka random untuk matrix)
 - Pakai thread untuk memanggil function multiply (kali)
