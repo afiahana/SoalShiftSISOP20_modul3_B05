@@ -46,4 +46,27 @@ for(j = 0; j < 20; j++){
 
 ### 4c. Batu ketiga adalah Onyx. Batu mulia berwarna hitam mengkilat. Pecahkan teka-teki berikut! 1. Buatlah program C ketiga dengan nama "​ 4c.c​ ". Program ini tidak memiliki hubungan terhadap program yang lalu. 2. Pada program ini, Norland diminta mengetahui jumlah file dan folder di direktori saat ini dengan command "​ ls | wc -l​ ". Karena sudah belajar IPC, Norland mengerjakannya dengan semangat. (​ Catatan!​ : Harus menggunakan IPC Pipes)
 Langkah-langkah : 
-- 
+- Buat array untuk pipe ``` int pi[2]; ```
+- Buat pipe ``` pipe(pi);
+```
+if(fork() == 0){
+        dup2(pi[1], 1);
+        close(pi[0]);
+        close(pi[1]);
+
+        char *argv[] = {"ls", NULL};
+        execv("/bin/ls", argv);
+    }
+```
+Disini ``` dup2(pi[1], 1); ``` adalah untuk menyimpan hasil ``` ls ``` di pi[1] dan argumen selanjutnya adalah 1 karena kita ingin write. Lalu jangan lupa menutup pipe.
+```
+if(fork() == 0){
+        dup2(pi[0], 0);
+        close(pi[1]);
+        close(pi[0]);
+            
+        char *argv[] = {"wc", "-l", NULL};
+        execv("/usr/bin/wc", argv);
+    }
+```
+Disini ``` dup2(pi[0], 0); ``` adalah untuk mengambil hasil ``` ls ``` kemudian menaruhnya di pi[0] dan argumen selanjutnya adalah 0 karena kita ingin read. Hasil read tersebut akan dipakai untuk execute ``` wc -l ```. Lalu jangan lupa menutup pipe.
