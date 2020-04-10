@@ -932,6 +932,31 @@ void* moveAll(void *arg){
 ```
 - Jika -d, maka akan memindah file yang ada di directory yang dituju ke folder dengan nama ekstensinya lalu folder tersebut diletakkan di current directory (directory tempat program dijalankan)
 ```
+void* moveChoosen(void *arg){
+    pthread_t id = pthread_self();
+    char *extFolder;
+    char destFolder[5000];
+
+    extFolder = getExt((char *)arg);
+
+    if(extFolder == NULL)
+        strcpy(destFolder, "Unknown");
+    else{
+        strcpy(destFolder, extFolder);
+        int i;
+        for(i=0; i<strlen(destFolder); i++)
+            if(destFolder[i] > 64 && destFolder[i] < 91)
+                destFolder[i] += 32;
+    }
+            
+    if(mkdir(destFolder, 0777) == -1);
+
+    char destPath[5000];
+    char sourcePath[5000];
+    snprintf(sourcePath, 5000, "%s/%s", tempDir, (char *)arg);
+    snprintf(destPath, 5000, "%s/%s/%s", curDir, destFolder, getFilename((char *)arg));
+    moveFileUtil(sourcePath, destPath);
+}
 ```
 
 ## 4. Norland adalah seorang penjelajah terkenal. Pada suatu malam Norland menyusuri jalan setapak menuju ke sebuah gua dan mendapati tiga pilar yang pada setiap pilarnya ada sebuah batu berkilau yang tertancap. Batu itu berkilau di kegelapan dan setiap batunya memiliki warna yang berbeda. Norland mendapati ada sebuah teka-teki yang tertulis di setiap pilar. Untuk dapat mengambil batu mulia di suatu pilar, Ia harus memecahkan teka-teki yang ada di pilar tersebut. Norland menghampiri setiap pilar secara bergantian.
