@@ -281,6 +281,86 @@ dan apabila sama maka status login akan suskses.
 jika yang diinputkan login maka dia akan membandingkan string yang ada pada login dengan register
 sehingga dapat mengauthentifikasi apakah username dan id sama. jika sama maka jalankan game jika gagal maka authentikasi akan gagal.
 
+=== BAGIAN SCREEN 2 ===
+pada bagian ini akan terdapat menu matchmaking yaitu find yang berfungsi untuk menemukan lawan. dan menu logout yaitu untuk kembali ke menu screen 1.
+
+```
+void *finding()
+{
+    while(1)
+    {
+        printf("Waiting for player ...\n");
+        sleep(1);
+    }
+}
+
+void *playing(void *arg)
+{
+    while(1)
+    {
+        char ch = getchar();
+        if(ch == ' ') 
+        {
+            printf("hit !!\n");
+            send(*(int*) arg, &ch, sizeof(ch), 0);
+        }
+    }
+}
+
+int main()
+{
+	screen2:
+	printf("1. Find Match\n2. Logout\nChoices : ");
+	scanf("%s", cmd2);
+	if(strcmp(cmd2, "logout") == 0)
+	{
+		send(sock, cmd2, strlen(cmd2), 0);
+		goto screen1;
+	}
+	else if(strcmp(cmd2, "find") == 0)
+	{
+		int start;
+		send(sock, cmd2, strlen(cmd2), 0);
+		pthread_t th;
+		pthread_create(&th, NULL, finding, NULL);
+		read(sock, &start, sizeof(start));
+		pthread_cancel(th);
+		printf("Game dimulai silahkan \e[3mtap tap\e[0m secepat mungkin !!\n");
+		struct termios prev, cur;
+		tcgetattr(0, &prev);
+		cur = prev;
+		cur.c_lflag &= -ICANON;
+		cur.c_lflag &= -ECHO;
+		tcsetattr(0, TCSANOW, &cur);
+		pthread_t th2;
+		pthread_create(&th2, NULL, playing, (void *) &sock);
+		int health = 100;
+		while(1)
+		{
+		    read(sock, &health, sizeof(health));
+		    if(health == -1) break;
+		    printf("Health: %d\n", health);
+		}
+		pthread_cancel(th2);
+		bool cek;
+		read(sock, &cek, sizeof(cek));
+		if(cek) printf("Game berakhir kamu menang\n");
+		else printf("Game berakhir kamu kalah\n");
+		tcsetattr(0, TCSANOW, &prev);
+		goto screen2;
+	}
+	else
+	{
+		printf("invalid input\n");
+		goto screen2;
+	}
+	...
+}
+
+```
+
+jadi pada screen 2 ini akan menjalankan 2 thread, yaitu yang pertam berfungsi untuk menjalankan "waiting for player ..." (pthread_create(&th, NULL, finding, NULL);) ketika melakukan matchmaking. dan akan terus berjalan hingga ditemukan lawan. lalu untuk mengecek ada dan tidaknya pemain, memakai fungsi read(sock, &start, sizeof(start));, yang mana variabel start akan dipassing dari server side dan memberitahu bahwa game sudah siap dimulai. untuk fungsi termios yaitu agar pada saat bermain, saat user menginputkan karakter spasi, langsung terbaca hit lawan. jadi tidak perlu menekan tombol enter. Saat bermain maka akan dijalankan thread yang berfungsi menunggu player saat menginput spasi untuk menembak musuh. Saat health salah satu player sudah habis (<= 0), maka server akan mengirimkan socket value health -1, yang menandakan game dihentikan, kemudian server mengirimkan kode ke masing-masing player apakah ia menang atau kalah.
+
 ## 3. Buatlah sebuah program dari C untuk mengkategorikan file. Program ini akan memindahkan file sesuai ekstensinya (tidak case sensitive. JPG dan jpg adalah sama) ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan ● Pada opsi -f tersebut, user bisa menambahkan argumen file yang bisa dikategorikan sebanyak yang user inginkan seperti contoh di atas.  ● Pada program kategori tersebut, folder jpg,c,zip tidak dibuat secara manual, melainkan melalui program c. Semisal ada file yang tidak memiliki ekstensi, maka dia akan disimpan dalam folder “Unknown”.  ● Program kategori ini juga menerima perintah (*) seperti di bawah; ● Artinya mengkategori seluruh file yang ada di working directory ketika menjalankan program C tersebut.  ● Selain hal itu program C ini juga menerima opsi -d untuk melakukan kategori pada suatu directory. Untuk opsi -d ini, user hanya bisa menginput 1 directory saja, tidak seperti file yang bebas menginput file sebanyak mungkin. ● Hasilnya perintah di atas adalah mengkategorikan file di /path/to/directory dan hasilnya akan disimpan di working directory di mana program C tersebut berjalan (hasil kategori filenya bukan di /path/to/directory).  ● Program ini tidak rekursif. Semisal di directory yang mau dikategorikan, atau menggunakan (*) terdapat folder yang berisi file, maka file dalam folder tersebut tidak dihiraukan, cukup file pada 1 level saja.  ● Setiap 1 file yang dikategorikan dioperasikan oleh 1 thread agar bisa berjalan secara paralel sehingga proses kategori bisa berjalan lebih cepat. Dilarang juga menggunakan fork-exec dan system.  ● Silahkan download soal3.zip sebagai percobaan. Namun silahkan dicoba-coba sendiri untuk kemungkinan test case lainnya yang mungkin belum ada di soal3.zip. 
 
 Langkah-langkah : 
